@@ -105,7 +105,7 @@ function dfsTree(node, ancestors, updateNodes, tipNodes) {
         node.endDate = childEndTime;
         node.needUpdate = true;
       }
-    } else if (node.duration) {
+    } else if (node.duration && !isNaN(node.duration)) {
       let startDate = node.startDate;
       if (preposeEndTime) {
         const start = calcIndex(preposeEndTime, workDate);
@@ -114,7 +114,8 @@ function dfsTree(node, ancestors, updateNodes, tipNodes) {
 
       if (startDate) {
         const end = calcIndex(startDate, workDate);
-        let endDate = workDate[end + node.duration - 1];
+        const duration = Math.ceil(node.duration);
+        let endDate = workDate[end + duration - 1];
   
         if (endDate > workDate[workDate.length - 1]) {
           throw new Error('超出节假日计算范围，请检查节假日表添加新的年份');

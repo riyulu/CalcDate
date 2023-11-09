@@ -70,6 +70,7 @@ export default {
     return {
       formData,
       errorTips,
+      tips,
       tableMetaList,
       clickUpdateDate,
     };
@@ -122,7 +123,7 @@ export default {
     <el-form-item v-if="errorTips" size="large">
       <p style="color: red; padding-top: 20px">{{ errorTips }}</p>
     </el-form-item>
-    <el-form-item v-if="tips" size="large">
+    <el-form-item v-else-if="tips" size="large">
       <p style="color: green; padding-top: 20px">{{ tips }}</p>
     </el-form-item>
   </el-form>
