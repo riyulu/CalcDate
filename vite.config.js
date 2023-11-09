@@ -11,6 +11,10 @@ export default defineConfig({
   server: {
     host: true
   },
+  base: '/CalcDate/',
+  build: {
+    outDir: 'docs',
+  },
   plugins: [
     vue(),
     AutoImport({
@@ -23,5 +27,5 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
 })
