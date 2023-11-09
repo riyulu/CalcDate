@@ -35,8 +35,9 @@ class Result {
 // const fieldKeys = {};
 const workDate = [];
 
-function dfsTree(node, ancestors, updateNodes, tipNodes) {
+function dfsTree(node, ancestors, path, updateNodes, tipNodes) {
   if (ancestors.has(node)) {
+    path.push(node.id);
     return true;
   }
 
@@ -49,10 +50,11 @@ function dfsTree(node, ancestors, updateNodes, tipNodes) {
   let childUpdateTime = 0;
   let fail = false;
   ancestors.add(node);
+  path.push(node.id);
   if (node.childrenNode.length) {
     let duration = 0;
     for (let child of node.childrenNode) {
-      if (ancestors.has(child) || dfsTree(child, ancestors, updateNodes, tipNodes)) {
+      if (dfsTree(child, ancestors,  path, updateNodes, tipNodes)) {
         return true;
       }
 
@@ -77,9 +79,8 @@ function dfsTree(node, ancestors, updateNodes, tipNodes) {
   // 子任务才计算前置，父任务忽略前置
   let preposeEndTime = 0;
   if (node.parent) {
-    let deadline = 0;
     for (let child of node.preposesNode) {
-      if (ancestors.has(child) || dfsTree(child, ancestors, updateNodes, tipNodes)) {
+      if (dfsTree(child, ancestors, path, updateNodes, tipNodes)) {
         return true;
       }
       // 前置任务失败，当前任务也失败
@@ -144,6 +145,7 @@ function dfsTree(node, ancestors, updateNodes, tipNodes) {
     updateNodes.add(node);
   }
 
+  path.pop();
   ancestors.delete(node);
   return false;
 }
@@ -151,10 +153,12 @@ function dfsTree(node, ancestors, updateNodes, tipNodes) {
 const calcDate = (trees, updateNodes) => {
   let ancestors = new Set();
   const tipNodes = new Set();
+  const path = [];
 
   for (let node of trees) {
-    if (dfsTree(node, ancestors, updateNodes, tipNodes)) {
-      return new Result(true, '存在循环依赖');
+    if (dfsTree(node, ancestors, path, updateNodes, tipNodes)) {
+      const index = path.indexOf(path[path.length - 1]);
+      return new Result(true, `存在循环依赖：${path.slice(index).join(' -> ')}，请检查`);
     }
   }
 
