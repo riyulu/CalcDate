@@ -284,22 +284,28 @@ export const updateDate = (data = tableData, fieldsData = tableFields) => {
   const trees = buildDependencyTree(records, fieldKeys);
   const updateNodes = new Set();
   const result = calcDate(trees, updateNodes);
-  if (result.error) {
-    console.log(result.msg);
-    return result;
-  }
 
   const newRecords = [];
   for (let node of updateNodes) {
+    const fields = { [fieldKeys.duration]: node.duration }
+    if (node.startDate) {
+      fields[fieldKeys.startDate] = node.startDate;
+    }
+    if (node.endDate) {
+      fields[fieldKeys.endDate] = node.endDate;
+    }
+    
     const record = {
       recordId: node.recordId,
-      fields: {
-        [fieldKeys.startDate]: node.startDate,
-        [fieldKeys.endDate]: node.endDate,
-        [fieldKeys.duration]: node.duration,
-      },
+      fields: fields,
     };
     newRecords.push(record);
+  }
+
+  if (result.error) {
+    console.log(result.msg);
+    result.data = newRecords;
+    return result;
   }
 
   return new Result(false, '更新成功', newRecords);

@@ -32,6 +32,7 @@ export default {
           const result = updateDate(tableData, tableFields);
           // console.log(result)
           if (result.error) {
+            const res = await table.setRecords(result.data);
             errorTips.value = `错误提示：${result.msg}`;
           } else {
             const res = await table.setRecords(result.data);
