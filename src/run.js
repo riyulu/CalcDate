@@ -18,7 +18,7 @@ class Node {
     this.endDate = 0;
     this.duration = 0;
     this.updateTime = 0;
-    this.needUpdate = false;
+    this.needUpdate = false; // 局部属性，可改为函数局部变量
     this.hasUpdate = false;
     this.fail = false;
   }
@@ -34,6 +34,8 @@ class Result {
 
 // const fieldKeys = {};
 const workDate = [];
+
+const isNeedUpdate = (node, start, end) => node.startDate !== start || node.endDate !== end;
 
 function dfsTree(node, ancestors, path, updateNodes, tipNodes) {
   if (ancestors.has(node)) {
@@ -78,7 +80,7 @@ function dfsTree(node, ancestors, path, updateNodes, tipNodes) {
 
   // 子任务才计算前置，父任务忽略前置
   let preposeEndTime = 0;
-  if (node.parent) {
+  if (node.parent || !node.childrenNode.length) {
     for (let child of node.preposesNode) {
       if (dfsTree(child, ancestors, path, updateNodes, tipNodes)) {
         return true;
@@ -100,7 +102,8 @@ function dfsTree(node, ancestors, path, updateNodes, tipNodes) {
       if (
         (!node.startDate || childUpdateTime >= node.updateTime) &&
         childStartTime < Number.MAX_VALUE &&
-        childEndTime
+        childEndTime &&
+        isNeedUpdate(node, childStartTime, childEndTime)
       ) {
         node.startDate = childStartTime;
         node.endDate = childEndTime;
@@ -121,10 +124,12 @@ function dfsTree(node, ancestors, path, updateNodes, tipNodes) {
         if (endDate > workDate[workDate.length - 1]) {
           throw new Error('超出节假日计算范围，请检查节假日表添加新的年份');
         }
-  
-        node.startDate = startDate;
-        node.endDate = endDate;
-        node.needUpdate = true;
+
+        if (isNeedUpdate(node, startDate, endDate)) {
+          node.startDate = startDate;
+          node.endDate = endDate;
+          node.needUpdate = true;
+        }
       } else {
         // 需要补充任务启动时间
         fail = true;
@@ -252,14 +257,14 @@ const buildDependencyTree = (records = [], fieldKeys) => {
     }
   });
 
-  nodes.forEach((node) => {
-    if (!node.parent && !node.preposeParent) {
-      trees.push(node);
-    }
-  });
+  // nodes.forEach((node) => {
+  //   if (!node.parent || !node.preposeParent) {
+  //     trees.push(node);
+  //   }
+  // });
 
   // console.log(trees);
-  return trees;
+  return nodes;
 };
 
 export const init = (holidaysTable, holidaysTableFiels) => {

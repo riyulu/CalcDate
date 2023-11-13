@@ -30,10 +30,12 @@ export default {
           const tableFields = await table.getFieldMetaList();
           // console.log(tableFields, tableData);
           const result = updateDate(tableData, tableFields);
-          // console.log(result)
+          console.log(result)
           if (result.error) {
             const res = await table.setRecords(result.data);
             errorTips.value = `错误提示：${result.msg}`;
+          } else if (Array.isArray(result.data) && !result.data.length) {
+            tips.value = `无需更新！`;
           } else {
             const res = await table.setRecords(result.data);
             tips.value = `更新成功！`;
